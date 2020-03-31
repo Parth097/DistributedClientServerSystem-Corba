@@ -1,0 +1,35 @@
+// Example of a "relay" - a client and server.
+// Uses the old favourite Hello World as a basis.
+
+module ClientAndServer {
+
+    struct Record{
+            string areaName;
+            string locationName;
+            long value;
+            long timeStamp;
+            string currentDate;
+        };
+
+    interface HQServer {
+
+	    void show_data(in long value, in string areaName, in string locationName, in long timeStamp, in string currentDate);
+	    void reg_lms(in string serverName, in string ior);
+
+    };
+
+    interface LMS {
+
+        typedef sequence<Record> readings_log;
+        readonly attribute readings_log log;
+        void recordedInfo(in Record reading);
+        void send_data();
+        string getNoxReading(in string sensorName);
+    };
+
+    interface Sensor {
+
+         Record getNoxReading();
+
+        };
+};
