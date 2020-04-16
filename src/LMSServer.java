@@ -61,14 +61,29 @@ class LMSServant extends LMSPOA {
 	@Override
 	public void send_data() {
 
-		if(num == 2){
-			int temp = recordArrayList.size()-1;
-			Record reading = recordArrayList.get(temp);
-			server.show_data(reading.value, reading.areaName, reading.locationName, reading.timeStamp, reading.currentDate);
-			num = 0;
-		}
-		num +=1;
+		//create a new arraylist
 
+		ArrayList<Record> tempRecord = new ArrayList<>();
+
+		Record lastRecord = recordArrayList.get(recordArrayList.size()-1);
+
+		String lastAreaName = lastRecord.areaName;
+
+		if(!recordArrayList.isEmpty() && recordArrayList.size()>=2){
+
+			for (Record record : recordArrayList) {
+				String currentAreaName = record.areaName;
+				if (!currentAreaName.equals(lastAreaName)) {
+					tempRecord.add(record);
+				}
+			}
+            if(!tempRecord.isEmpty()){
+            	if(Math.abs(tempRecord.get(tempRecord.size()-1).timeStamp) - Math.abs(recordArrayList.get(recordArrayList.size()-1).timeStamp) <= 10000){
+					Record reading = recordArrayList.get(recordArrayList.size()-1);
+					server.show_data(reading.value, reading.areaName, reading.locationName, reading.timeStamp, reading.currentDate);
+				}
+			}
+		}
 	}
 
 	@Override

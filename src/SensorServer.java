@@ -130,11 +130,11 @@ public class SensorServer {
     		lblValue.setBounds(13, 47, 61, 16);
     		frame.getContentPane().add(lblValue);
     		
-    		JLabel lblLocation = new JLabel("Location");
+    		JLabel lblLocation = new JLabel("Area");
     		lblLocation.setBounds(13, 92, 54, 16);
     		frame.getContentPane().add(lblLocation);
     		
-    		JLabel lblArea = new JLabel("Area");
+    		JLabel lblArea = new JLabel("Location");
     		lblArea.setBounds(13, 144, 61, 16);
     		frame.getContentPane().add(lblArea);
     		
