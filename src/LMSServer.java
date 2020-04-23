@@ -17,11 +17,13 @@ class LMSServant extends LMSPOA {
 	private ClientAndServer.Sensor sensorServer;
 	private ArrayList<Record> recordArrayList;
 	readings_logHolder readingsHolder = new readings_logHolder();
+	private ArrayList<String> sensorList;
 
 	LMSServant(ORB orb_val) {
 		recordArrayList = new ArrayList<>();
 		// store reference to ORB
 		orb = orb_val;
+		sensorList = new ArrayList<>();
 	}
 
 	public void registerServer(String serverName, String ior){
@@ -43,6 +45,15 @@ class LMSServant extends LMSPOA {
 		server.reg_lms(serverName, ior);
 	}
 
+
+	@Override
+	public String[] sensorList() {
+		String[] temp = new String[sensorList.size()];
+		for (int i = 0; i<sensorList.size(); i ++){
+			temp[i] = sensorList.get(i);
+		}
+		return temp;
+	}
 
 	@Override
 	public Record[] log() {
@@ -105,9 +116,78 @@ class LMSServant extends LMSPOA {
 		return  "Area Name: " + reading.areaName + "\n" + "Location Name: " + reading.locationName +"\n" + "Nox Value: " + reading.value +"\n" + "Time: " + reading.timeStamp +"\n" + "Date: " + reading.currentDate;
 	}
 
+	@Override
+	public void addSensor(String sensorName) {
+		sensorList.add(sensorName);
+	}
+
+	@Override
+	public void turnOnSensor(String sensorName) {
+
+		// look up the server
+		try {
+			// read in the 'stringified IOR'
+			BufferedReader in = new BufferedReader(new FileReader(sensorName + "Sensor.ref"));
+			String stringified_ior = in.readLine();
+
+			// get object reference from stringified IOR
+			org.omg.CORBA.Object server_ref = orb.string_to_object(stringified_ior);
+			sensorServer = ClientAndServer.SensorHelper.narrow(server_ref);
+		} catch (Exception e) {
+			System.out.println("ERROR : " + e) ;
+			e.printStackTrace(System.out);
+		}
+
+		sensorServer.turnOn();
+
+	}
+
+	@Override
+	public void turnOffSensor(String sensorName) {
+
+		// look up the server
+		try {
+			// read in the 'stringified IOR'
+			BufferedReader in = new BufferedReader(new FileReader(sensorName + "Sensor.ref"));
+			String stringified_ior = in.readLine();
+
+			// get object reference from stringified IOR
+			org.omg.CORBA.Object server_ref = orb.string_to_object(stringified_ior);
+			sensorServer = ClientAndServer.SensorHelper.narrow(server_ref);
+		} catch (Exception e) {
+			System.out.println("ERROR : " + e) ;
+			e.printStackTrace(System.out);
+		}
+
+		sensorServer.turnOff();
+
+	}
+
+	@Override
+	public boolean checkStatus(String sensorName) {
+		// look up the server
+		try {
+			// read in the 'stringified IOR'
+			BufferedReader in = new BufferedReader(new FileReader(sensorName + "Sensor.ref"));
+			String stringified_ior = in.readLine();
+
+			// get object reference from stringified IOR
+			org.omg.CORBA.Object server_ref = orb.string_to_object(stringified_ior);
+			sensorServer = ClientAndServer.SensorHelper.narrow(server_ref);
+		} catch (Exception e) {
+			System.out.println("ERROR : " + e) ;
+			e.printStackTrace(System.out);
+		}
+
+		Boolean status = sensorServer.findCurrentStatus();
+
+		return status;
+	}
+
 }
 
 public class LMSServer {
+
 
 	public static void main(String[] args) {
 		try {

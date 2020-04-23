@@ -20,16 +20,29 @@ module ClientAndServer {
 
     interface LMS {
 
+    typedef sequence<string> connectedSensors;
+    readonly attribute connectedSensors sensorList;
+
         typedef sequence<Record> readings_log;
         readonly attribute readings_log log;
         void recordedInfo(in Record reading);
         void send_data();
         string getNoxReading(in string sensorName);
+        void addSensor(in string sensorName);
+
+        void turnOnSensor(in string sensorName);
+        void turnOffSensor(in string sensorName);
+
+        boolean checkStatus(in string sensorName);
     };
 
     interface Sensor {
 
          Record getNoxReading();
+
+         void turnOn();
+         void turnOff();
+         boolean findCurrentStatus();
 
         };
 };

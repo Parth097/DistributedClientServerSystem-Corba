@@ -9,6 +9,7 @@ import ClientAndServer.SensorPOA;
 import org.omg.CORBA.ORB;
 
 import ClientAndServer.Record;
+import org.omg.GSSUP.GSSUPMechOID;
 import org.omg.PortableServer.POA;
 import org.omg.PortableServer.POAHelper;
 
@@ -38,6 +39,25 @@ class SensorServant extends SensorPOA {
 
 		return reading;
 	}
+
+	@Override
+	public void turnOn() {
+
+		parent.setStatus(true);
+
+	}
+
+	@Override
+	public void turnOff() {
+
+		parent.setStatus(false);
+
+	}
+
+	@Override
+	public boolean findCurrentStatus() {
+		return parent.getStatus();
+	}
 }
 
 public class SensorServer {
@@ -52,6 +72,7 @@ public class SensorServer {
 	public static int value;
 	public static int time;
 	public static String currentDate;
+	private Boolean status;
 
 	//public ClientAndServer.Sensor sensor;
 
@@ -87,6 +108,7 @@ public class SensorServer {
 	 */
 	private void initialize(String[] args) {
 		try {
+			this.status = true;
             // create and initialize the ORB
             ORB orb = ORB.init(args, null);
 
@@ -113,6 +135,8 @@ public class SensorServer {
             org.omg.CORBA.Object server_ref =
                     orb.string_to_object(stringified_ior);
             ClientAndServer.LMS locaMonitoringSystem = ClientAndServer.LMSHelper.narrow(server_ref);
+
+            locaMonitoringSystem.addSensor(sensorName);
 			System.out.println("Connected to Local Monitoring System...");
 			// End of the connection code
 
@@ -164,33 +188,36 @@ public class SensorServer {
 			JSlider slider = new JSlider();
 			slider.addChangeListener(new ChangeListener() {
 				public void stateChanged(ChangeEvent e) {
-					JSlider jSlider = (JSlider) e.getSource();
-					if(!jSlider.getValueIsAdjusting()){
-						value = jSlider.getValue();
+					if(status){
+						JSlider jSlider = (JSlider) e.getSource();
+						if(!jSlider.getValueIsAdjusting()){
+							value = jSlider.getValue();
 
-						Date date = new Date();
-						long time_long = date.getTime();
-						time = (int) time_long;
-						currentDate = date.toString();
+							Date date = new Date();
+							long time_long = date.getTime();
+							time = (int) time_long;
+							currentDate = date.toString();
 
-						Record record = new Record();
+							Record record = new Record();
 
-						record.areaName = sensorName;
-						record.locationName = sensorLoc;
-						record.value = value;
-						record.timeStamp = time;
-						record.currentDate = currentDate;
-;
+							record.areaName = sensorName;
+							record.locationName = sensorLoc;
+							record.value = value;
+							record.timeStamp = time;
+							record.currentDate = currentDate;
+							;
 
-						locaMonitoringSystem.recordedInfo(record);
+							locaMonitoringSystem.recordedInfo(record);
 
-						if(record.value>=50){
-							locaMonitoringSystem.send_data();
+							if(record.value>=50){
+								locaMonitoringSystem.send_data();
+							}
+
+							textFieldValue.setText(String.valueOf(value));
 						}
-
-						textFieldValue.setText(String.valueOf(value));
 					}
-				}
+					}
+
 			});
 			slider.setBounds(24, 193, 190, 29);
 			frame.getContentPane().add(slider);
@@ -201,4 +228,14 @@ public class SensorServer {
             e.printStackTrace(System.out);
         }
     }
+
+    public void setStatus(Boolean status){
+		this.status = status;
+
+		System.out.println(status);
+	}
+
+	public boolean getStatus(){
+		return status;
+	}
 }
